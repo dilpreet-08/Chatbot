@@ -8,7 +8,9 @@ def extract_text_from_pdf(path):
     reader = PdfReader(path)
     text = ""
     for page in reader.pages:
-        text += page.extract_text() + "\n"
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text + "\n"
     return text
 
 def extract_text_from_docx(path):

@@ -1,6 +1,6 @@
 import requests
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 MODEL_NAME = "llama3"   # change if using another model
 
 
@@ -39,7 +39,7 @@ Answer:
                 "stream": False,
                 "temperature": 0.2  # lower = more factual, less hallucination
             },
-            timeout=60
+            timeout=(2.0, 30.0)
         )
 
         response.raise_for_status()
@@ -47,16 +47,12 @@ Answer:
 
         answer = result.get("response", "").strip()
 
-        # Clean excessive whitespace
         answer = "\n".join(line.strip() for line in answer.splitlines() if line.strip())
 
         return answer if answer else "I could not generate a response."
 
-    except requests.exceptions.ConnectionError:
-        return "Error: Could not connect to LLaMA server. Make sure Ollama is running."
-
-    except requests.exceptions.Timeout:
-        return "Error: LLaMA response timed out."
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+        return f"Based on NIT Jalandhar records:\n\n{context}\n\n*(Note: Ollama is offline or timed out. Start Ollama with 'ollama run llama3' for AI-synthesized answers.)*"
 
     except Exception as e:
-        return f"Unexpected error: {str(e)}"
+        return f"Based on NIT Jalandhar records:\n\n{context}\n\n*(Note: {str(e)})*"
